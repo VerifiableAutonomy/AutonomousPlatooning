@@ -37,9 +37,9 @@ function setup(block)
 
     % Register number of ports
 %    if strcmpi(block.DialogPrm(4).Data, 'on')
-      block.NumOutputPorts = 1;
+ %     block.NumOutputPorts = 1;
  %   else
- %     block.NumOutputPorts = 2;
+      block.NumOutputPorts = 2;
  %   end
 
     % Register parameters
@@ -74,6 +74,7 @@ function setup(block)
     %% SetOutputPortDatatype:
     %%   Functionality    : Check and set output port datatypes
     block.RegBlockMethod('SetOutputPortDataType', @SetOutputPortDataType);
+    block.RegBlockMethod('SetInputPortSamplingMode', @SetInputPortSamplingMode);
 
     %% -----------------------------------------------------------------
     %% Register methods called at run-time
@@ -110,6 +111,11 @@ function SetOutputPortDims(block)
         block.OutputPort(2).Dimensions = 1; % Size is 1.
     end
 %endfunction SetOutputPortDims
+
+
+function SetInputPortSamplingMode(s, port, mode)
+    s.InputPort(port).SamplingMode = mode;
+   
 
 %% SetOutputPortDataType - Check and set output port datatypes
 function SetOutputPortDataType(block)
@@ -201,19 +207,19 @@ function Outputs(block)
     
     % If blocking mode, just wait until data is received. 
 %    if strcmpi(block.DialogPrm(4).Data, 'on')
-        data = localGetData(tcpipObj, block);
-        if (numel(data) ~= prod(block.DialogPrm(3).Data))
-            error(message('instrument:instrumentblks:timeouterror'));
-        end
-%     else
-%         bytesAvailable  = get(tcpipObj, 'BytesAvailable');
-%         if (bytesAvailable >= block.OutputPort(1).DataStorageSize)
-%             data = localGetData(tcpipObj, block);
-%             block.OutputPort(2).Data = 1; % Set status to 1.
-%         else % If requested data not available
-%             data = [];
-%             block.OutputPort(2).Data = 0; % Set status to 0.
+%         data = localGetData(tcpipObj, block);
+%         if (numel(data) ~= prod(block.DialogPrm(3).Data))
+%             error(message('instrument:instrumentblks:timeouterror'));
 %         end
+%     else
+        bytesAvailable  = get(tcpipObj, 'BytesAvailable');
+        if (bytesAvailable >= block.OutputPort(1).DataStorageSize)
+            data = localGetData(tcpipObj, block);
+            block.OutputPort(2).Data = 1; % Set status to 1.
+        else % If requested data not available
+            data = [];
+            block.OutputPort(2).Data = 0; % Set status to 0.
+        end
 %     end
     
     % Reshaping the size. 
